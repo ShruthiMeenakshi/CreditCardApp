@@ -2,22 +2,26 @@ package com.creditcard.CreditCardApp.controller;
 
 import com.creditcard.CreditCardApp.model.Application;
 import com.creditcard.CreditCardApp.service.ApplicationService;
-import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/applications")
+@CrossOrigin(origins = "http://localhost:5173")
 public class ApplicationController {
 
-    @Autowired
-    private ApplicationService service;
+    private final ApplicationService applicationService;
+
+    public ApplicationController(ApplicationService applicationService) {
+        this.applicationService = applicationService;
+    }
 
     @PostMapping("/apply")
-    public Application apply(@Valid @RequestBody Application app) {
-        return service.apply(app);
+    public Application apply(@RequestBody Application application) {
+        return applicationService.apply(application);
+    }
+
+    @GetMapping("/status/{id}")
+    public Application getStatus(@PathVariable String id) {
+        return applicationService.getStatus(id);
     }
 }
