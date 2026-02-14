@@ -28,8 +28,8 @@ public class Application {
     private double annualIncome;
 
     private String status;
-    private int creditScore;     // ✅ int (matches service)
-    private int creditLimit;     // ✅ int
+    private int creditScore;
+    private int creditLimit;
     private String rejectionReason;
 
 }
