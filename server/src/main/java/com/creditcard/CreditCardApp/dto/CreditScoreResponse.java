@@ -1,6 +1,8 @@
 package com.creditcard.CreditCardApp.dto;
 
-public record CreditScoreResponse(String panNumber, int creditScore) {
+import java.time.LocalDate;
+
+public record CreditScoreResponse(String applicantName, LocalDate dateOfBirth, String panNumber, Double annualIncome) {
 
 }
 

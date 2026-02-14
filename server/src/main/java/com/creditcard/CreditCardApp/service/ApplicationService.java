@@ -1,8 +1,13 @@
 package com.creditcard.CreditCardApp.service;
 
+import com.creditcard.CreditCardApp.dto.ApplicationRequest;
+import com.creditcard.CreditCardApp.dto.ApplicationResponse;
 import com.creditcard.CreditCardApp.model.Application;
+import com.creditcard.CreditCardApp.model.ApplicationStatus;
 import com.creditcard.CreditCardApp.repository.ApplicationRepository;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
 
 @Service
 public class ApplicationService {
@@ -16,30 +21,41 @@ public class ApplicationService {
         this.creditScoreService = creditScoreService;
     }
 
-    public Application apply(Application application) {
+    public ApplicationResponse apply(ApplicationRequest request) {
+
+        // Step 0: DTO → Entity
+        Application application = new Application();
+        application.setFullName(request.fullName());
+        application.setPanNumber(request.panNumber());
+        application.setDateOfBirth(request.dateOfBirth());
+        application.setAppliedDate(LocalDate.now().atStartOfDay());
 
         // Step 1: Get credit score
-        int creditScore = creditScoreService
-                .getCreditScore(application.getPanNumber());
-
+        int creditScore = creditScoreService.getCreditScore(request.panNumber());
         application.setCreditScore(creditScore);
 
         // Step 2: Decision logic
         if (creditScore >= 750) {
-            application.setStatus("APPROVED");
-            application.setCreditLimit(500000);
-        }
-        else if (creditScore >= 650) {
-            application.setStatus("APPROVED");
-            application.setCreditLimit(200000);
-        }
-        else {
-            application.setStatus("REJECTED");
+            application.setStatus(ApplicationStatus.APPROVED);
+            application.setCreditLimit(500_000);
+        } else if (creditScore >= 650) {
+            application.setStatus(ApplicationStatus.APPROVED);
+            application.setCreditLimit(200_000);
+        } else {
+            application.setStatus(ApplicationStatus.REJECTED);
             application.setCreditLimit(0);
             application.setRejectionReason("Low credit score");
         }
 
-        // Step 3: Save and return
-        return applicationRepository.save(application);
+        // Step 3: Save to MongoDB
+        Application savedApplication = applicationRepository.save(application);
+
+        // Step 4: Entity → Response DTO
+        return new ApplicationResponse(
+                savedApplication.getApplicationId(),
+                savedApplication.getStatus(),
+                savedApplication.getCreditLimit(),
+                savedApplication.getRejectionReason()
+        );
     }
 }

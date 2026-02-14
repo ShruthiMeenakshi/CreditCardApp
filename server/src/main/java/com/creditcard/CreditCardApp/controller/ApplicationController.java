@@ -1,5 +1,7 @@
 package com.creditcard.CreditCardApp.controller;
 
+import com.creditcard.CreditCardApp.dto.ApplicationRequest;
+import com.creditcard.CreditCardApp.dto.ApplicationResponse;
 import com.creditcard.CreditCardApp.model.Application;
 import com.creditcard.CreditCardApp.service.ApplicationService;
 import jakarta.validation.Valid;
@@ -17,7 +19,9 @@ public class ApplicationController {
     private ApplicationService service;
 
     @PostMapping("/apply")
-    public Application apply(@Valid @RequestBody Application app) {
-        return service.apply(app);
+    public ApplicationResponse apply(
+            @Valid @RequestBody ApplicationRequest request
+    ) {
+        return service.apply(request);
     }
 }
