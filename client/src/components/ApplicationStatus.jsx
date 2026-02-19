@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { getApplicationStatus } from "../services/api";
 
 function ApplicationStatus() {
   const [applicationId, setApplicationId] = useState("");
@@ -18,25 +19,10 @@ function ApplicationStatus() {
 
     try {
       setLoading(true);
-
-      const response = await fetch(
-        `http://localhost:8080/api/applications/status/${applicationId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Application not found");
-      }
-
-      const data = await response.json();
+      const data = await getApplicationStatus(applicationId);
       setResult(data);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Failed to fetch status');
     } finally {
       setLoading(false);
     }
@@ -63,8 +49,9 @@ function ApplicationStatus() {
 
       {result && (
         <div style={{ marginTop: "20px" }}>
+          <p><strong>Application ID:</strong> {result.applicationId}</p>
           <p><strong>Status:</strong> {result.status}</p>
-          <p><strong>Credit Score:</strong> {result.creditScore}</p>
+          <p><strong>Credit Limit:</strong> {result.creditLimit ?? 'N/A'}</p>
           {result.rejectionReason && (
             <p><strong>Reason:</strong> {result.rejectionReason}</p>
           )}

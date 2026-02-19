@@ -9,10 +9,24 @@ export async function submitApplication(data) {
     body: JSON.stringify(data)
   });
 
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(errText || 'Failed to submit application');
+  }
+
   return response.json();
 }
 
 export async function getApplicationStatus(id) {
-  const response = await fetch(`${BASE_URL}/status/${id}`);
+  const response = await fetch(`${BASE_URL}/${id}`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' }
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(errText || 'Application not found');
+  }
+
   return response.json();
 }
