@@ -2,6 +2,7 @@ package com.creditcard.CreditCardApp.controller;
 
 import com.creditcard.CreditCardApp.dto.ApplicationRequest;
 import com.creditcard.CreditCardApp.dto.ApplicationResponse;
+import com.creditcard.CreditCardApp.model.ApplicationStatus;
 import com.creditcard.CreditCardApp.service.ApplicationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,5 +32,10 @@ public class ApplicationController {
     public ApplicationResponse getById(@PathVariable String id) {
         return service.getApplicationById(id);
     }
+    @GetMapping("/status/{status}")
+    public List<ApplicationResponse> getByStatus(@PathVariable ApplicationStatus status) {
+        return service.getApplicationsByStatus(status);
+    }
+
 
 }

@@ -84,4 +84,18 @@ public class ApplicationService {
                 application.getRejectionReason()
         );
     }
+    public List<ApplicationResponse> getApplicationsByStatus(ApplicationStatus status) {
+
+        List<Application> applications = applicationRepository.findByStatus(status);
+
+        return applications.stream()
+                .map(app -> new ApplicationResponse(
+                        app.getApplicationId(),   // or getId() depending on your field
+                        app.getStatus(),
+                        app.getCreditLimit(),
+                        app.getRejectionReason()
+                ))
+                .toList();
+    }
+
 }
