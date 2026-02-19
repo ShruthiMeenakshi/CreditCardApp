@@ -8,6 +8,7 @@ import com.creditcard.CreditCardApp.repository.ApplicationRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 
 @Service
@@ -29,23 +30,43 @@ public class ApplicationService {
         application.setFullName(request.fullName());
         application.setPanNumber(request.panNumber());
         application.setDateOfBirth(request.dateOfBirth());
+        application.setAnnualIncome(request.annualIncome());
         application.setAppliedDate(LocalDate.now().atStartOfDay());
 
-        // Step 1: Get credit score
+        // Step 1: Get credit score (store for records; not the sole approval criteria)
         int creditScore = creditScoreService.getCreditScore(request.panNumber());
         application.setCreditScore(creditScore);
 
-        // Step 2: Decision logic
-        if (creditScore >= 750) {
-            application.setStatus(ApplicationStatus.APPROVED);
-            application.setCreditLimit(500_000);
-        } else if (creditScore >= 650) {
-            application.setStatus(ApplicationStatus.APPROVED);
-            application.setCreditLimit(200_000);
-        } else {
+        // Step 2: Age validation - applicant must be older than 18
+        int age = Period.between(request.dateOfBirth(), LocalDate.now()).getYears();
+        if (age <= 18) {
             application.setStatus(ApplicationStatus.REJECTED);
             application.setCreditLimit(0);
-            application.setRejectionReason("Low credit score");
+            application.setRejectionReason("Applicant must be older than 18");
+            Application savedApp = applicationRepository.save(application);
+            return new ApplicationResponse(
+                    savedApp.getApplicationId(),
+                    savedApp.getStatus(),
+                    savedApp.getCreditLimit(),
+                    savedApp.getRejectionReason()
+            );
+        }
+
+        // Step 3: Income-based credit limit rules
+        double income = request.annualIncome();
+        if (income <= 200_000) {
+            application.setStatus(ApplicationStatus.APPROVED);
+            application.setCreditLimit(50_000);
+        } else if (income <= 300_000) {
+            application.setStatus(ApplicationStatus.APPROVED);
+            application.setCreditLimit(75_000);
+        } else if (income <= 500_000) {
+            application.setStatus(ApplicationStatus.APPROVED);
+            application.setCreditLimit(1_000_000);
+        } else {
+            application.setStatus(ApplicationStatus.PENDING);
+            application.setCreditLimit(null);
+            application.setRejectionReason("Manual review required for high income applicants");
         }
 
         // Step 3: Save to MongoDB
