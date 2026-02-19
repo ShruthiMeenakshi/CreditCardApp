@@ -8,6 +8,7 @@ import com.creditcard.CreditCardApp.repository.ApplicationRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class ApplicationService {
@@ -56,6 +57,31 @@ public class ApplicationService {
                 savedApplication.getStatus(),
                 savedApplication.getCreditLimit(),
                 savedApplication.getRejectionReason()
+        );
+
+    }
+    public List<ApplicationResponse> getAllApplications() {
+        List<Application> applications = applicationRepository.findAll();
+
+        return applications.stream()
+                .map(app -> new ApplicationResponse(
+                        app.getApplicationId(),
+                        app.getStatus(),
+                        app.getCreditLimit(),
+                        app.getRejectionReason()
+                ))
+                .toList();
+    }
+
+    public ApplicationResponse getApplicationById(String id) {
+        Application application = applicationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Application not found with id: " + id));
+
+        return new ApplicationResponse(
+                application.getApplicationId(),   // or getId() if your field is named id
+                application.getStatus(),
+                application.getCreditLimit(),
+                application.getRejectionReason()
         );
     }
 }
