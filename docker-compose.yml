@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+
+  mongodb:
+    image: mongo:6
+    container_name: creditcard-mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  server:
+    build: ./server
+    container_name: creditcard-server
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongodb
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/creditcardappdb
+
+  client:
+    build: ./client
+    container_name: creditcard-client
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - server
+
+volumes:
+  mongo-data:
